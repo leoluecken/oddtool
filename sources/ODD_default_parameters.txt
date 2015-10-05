@@ -1,0 +1,145 @@
+/* ODD_default_parameters.txt
+ *
+ * This file contains the default values for parameters which are
+ * left unspecified by the user. Do only change in case that you
+ * want to change defaults.
+ * Do not deliberately disable (delete or comment) parameters. That could 
+ * cause a crash.
+ * To change parameters for a specific system, edit ODD_parameters.txt instead
+ *
+ */
+
+
+/* system dimension */
+N = 0
+
+/* system name */
+/* This specifies how the output files will be named:
+ * <name>_data/t.txt
+ * <name>_data/x.txt
+ * <name>_data/f.txt
+ * <name>_temp/continuation_t.txt
+ * <name>_temp/continuation_x.txt
+ * <name>_temp/continuation_f.txt
+ */
+name= noname
+
+/* filenames for the history data supplied by the user
+ * NOTE: It is possible to specify a single filename as history_filename, e.g.,
+ * history_filename= ODD_history.txt, which contains in each row a dataset of the form
+ * t x1 x2 ... xn
+ * or, if you can provide derivatives of the history, of the form
+ * t x1 x2 ... xn f1 f2 ... fn
+ * You can also provide your history in seperate files whose names then are given
+ * as history_t_filename, history_x_filename and, optionally, history_f_filename
+ * Do not provide both history_filename and a seperate file, e.g. history_t_filename
+ */
+history_filename= ODD_history.txt
+history_t_filename= none
+history_x_filename= none
+history_f_filename= none
+
+/* force ODDtool to use the history in the file, even though a
+ * user history function is supplied (prevents recompilation in case of continuation) */
+force_history_from_file = 0
+
+/* user specified parameters for the rhs (no defaults) */
+// p0 = ...
+// p1 = ...
+
+/* DELAYS */
+/* specifiy delays in the format t_<nr>
+/* NOTE: if the minimal delay is smaller than the maximal stepsize h_max, 
+ * extrapolation might be used for the intermediate steps of the RK-method
+ * (no defaults)
+ */
+// t0 = ...
+// t1 = ...
+
+
+/* minimal and maximal delay default values (not to be edited by user) */
+tau_min= 0
+tau_max= 0
+
+/* INTERGRATION */
+
+
+/* end time (time till which solution is integrated) */
+t_end = 1
+
+/* start time (only relevant, when using user-supplied history fct,
+ * otherwise, starting time is the largest time supplied in the history file 
+ */
+t_start = 0
+
+/* time after which saving should start */
+save_offset = 0
+
+/* Configuration of partial saving
+ * offset points and interval lengths for periodic saving.
+ * timepoints t > save_offset are saved if they fall 
+ * into some interval [t0 + kT, t0 + kT + p] where k is an integer,
+ * t0 = partial_save_offset
+ * T  = partial_save_period 
+ * p  = partial_save_length
+ * If p > T or T <= 0, the feature is disabled */
+partial_save_offset = 0
+partial_save_period = 0
+partial_save_length = 0
+
+/* save_step > 0 specifies a minimal time-grid for saving data points of the 
+ * solution. if the stepper chooses larger steps the grid may become sparser,
+ * but it won't contain more than saved-time/save_step points
+ * If save_step == 0 the steps chosen by the stepper are saved. */
+save_step = 1
+
+/* desired relative accuracy 
+ * set to rel_tol = 0 to disable checking for relative tolerance bounds */
+rel_tol = 1e-5
+
+/* desired absolute accuracy */
+abs_tol = 1e-5
+
+/* maximum number of integration steps */
+max_steps = 1e5
+
+/* initial step-size 
+ * NOTE: this value is cut off at maximal_stepsize_rescale*tau_min/2
+ * because some initial steps with a restricted size have to be taken */
+h0 = 0.1
+
+/* minimal step-size */
+hmin = 1e-4  
+
+/* maximal step-size */
+hmax = 1.0
+
+/* should derivatives be saved for the solution ? 
+ * = 0 means 'no', everything else means 'yes'  */
+save_derivatives = 0
+
+/* should initial data be saved as a part of the solution? 
+ * = 0 means 'no', everything else means 'yes' */
+save_history = 0
+
+/* should continuation data be saved? 
+ * = 0 means 'no', everything else means 'yes' 
+ * as continuation data the last calculated 
+ * interval of length tau_max + hmax*2 is saved completely 
+ * in the file ./<name>_output/continuation_data/<name>_history.txt 
+ * it can be plugged into a new run by setting history_filename appropriately */
+save_continuation_data = 1
+
+/* maximal "stretching" of h per step */
+maximal_stepsize_rescale = 2.0 
+
+/* maximal "shrinking" of h per step */
+minimal_stepsize_rescale = 0.3
+
+/* safety-factor for step-size adaption */
+safety_factor = 0.9
+
+/* minimal nr of points stored in the SwapVectorStorage 
+ * (== minimal amount of data points written to disk per memory-flush) 
+ */
+min_points = 100

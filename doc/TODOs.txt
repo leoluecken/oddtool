@@ -1,0 +1,24 @@
+TODOs (also check for XXX, FIXME, TODO inside code):
+
+- allow inline comments in parameters.txt
+
+- rename system_name_temp/continuation_*.txt into system_name_continuation_data/history_*.txt for simpler continuation workflow
+
+- verbosity control is messed up, because it didn't work -- clean up
+
+- discuss stack pre-allocation (instead of heap) for SwapVectorStorage
+
+- test, test, test
+
+- allow control of the density of output values 
+  (e.g. equidistant at output_grid)
+
+- assure that SwapVectorStorage::data.size() >= 3
+
+- handle situation without provided history for derivatives, i.e.,
+- in Hermite interpolation: if no stored data for the rhs is provided, try something else (Newton interpolation?)
+
+- Optimize interpolation by narrowing ranges simultaneously
+- Optimize subsequent interpolation calls with similar t_query (during RK)
+
+- compare performance to matlab dde23

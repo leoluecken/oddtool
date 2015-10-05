@@ -1,0 +1,1025 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+ODDtool Documentation
+\end_layout
+
+\begin_layout Author
+Leonhard Lücken, Dmitry Puzyrev, Markus Kantner and Serhiy Yanchuk
+\end_layout
+
+\begin_layout Date
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout Standard
+ODDtool (
+\begin_inset Quotes eld
+\end_inset
+
+ODD
+\begin_inset Quotes erd
+\end_inset
+
+ stands for 
+\begin_inset Quotes eld
+\end_inset
+
+Ordinary Delay Differential equations
+\begin_inset Quotes erd
+\end_inset
+
+) allows the integration of high dimensional delay differential equations
+ involving many different or very large delays.
+ In particular, spatio-temporal phenomena in systems with large delay can
+ take place on a very slow timescale and require in an efficient way to
+ deal with large amounts of data representing the solutions history.
+ Up to date this is not achieved by any other DDE-solver known to the authors.
+ ODDtool has been used for simulations in the papers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Puzyrev2014,Yanchuk2014,Yanchuk2015b,Klinshov2015,Kantner2015"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The header 
+\family typewriter
+ODDtool.h
+\family default
+ provides an interface for the integration of delay differential equations
+ with constant point delays.
+ The class which implements the integration is called 
+\family typewriter
+ODD_integrator<CKStepper>
+\family default
+ and possesses a method 
+\family typewriter
+integrate()
+\family default
+ which generates solution data and writes it to output-files.
+ The template parameter 
+\family typewriter
+CKStepper
+\family default
+ denotes a class which implements a CashKarp adaptive-stepwidth method for
+ the actual computation of integration steps.
+ Other integration methods can be added by implementing different stepper
+ classes (which should implement the abstract class 
+\family typewriter
+ODD_Stepper
+\family default
+).
+ This template design is inspired from the 
+\family typewriter
+Odeint
+\family default
+ class given in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Press2007"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+These instructions presuppose that you are working on a unix system with
+ gcc4.9 or higher and the 
+\family typewriter
+boost
+\family default
+ libraries installed
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+check the boost linkage in the 
+\family typewriter
+Makefile
+\family default
+ if compilation does not work
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Usage
+\end_layout
+
+\begin_layout Subsection*
+Providing the right hand side
+\end_layout
+
+\begin_layout Standard
+To use the integrator, you include the header 
+\family typewriter
+ODDtool.h
+\family default
+ and provide the right hand side of the equation 
+\begin_inset Formula 
+\begin{equation}
+\dot{x}(t)=f(p;t,x(t),x(t-\tau_{1}),...,x(t-\tau_{n_{\tau}}))\in\mathbb{R}^{N},\label{eq:rhs-analytical}
+\end{equation}
+
+\end_inset
+
+you wish to integrate.
+ Here, the vector 
+\begin_inset Formula $p\in\mathbb{R}^{n_{p}}$
+\end_inset
+
+ contains the system's parameters, 
+\begin_inset Formula $t\in\mathbb{R}$
+\end_inset
+
+ is a scalar value of the time, and 
+\begin_inset Formula $x(t-\tau_{k})\in\mathbb{R}^{N}$
+\end_inset
+
+ is the systems state at time 
+\begin_inset Formula $t-\tau_{j}$
+\end_inset
+
+.
+ The function 
+\begin_inset Formula $f$
+\end_inset
+
+ must be implemented as a 
+\family typewriter
+C++
+\family default
+ function with the following signature:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+\family typewriter
+void f(double, const vector<double>&, ODD_delayed_values&, const vector<double>&
+, vector<double>&)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the type 
+\family typewriter
+ODD_delayed_values
+\family default
+ is a data structure which contains the needed values 
+\begin_inset Formula $x_{i}(t-\tau_{j})$
+\end_inset
+
+.
+ From an object 
+\family typewriter
+xd
+\family default
+ of this type the value 
+\begin_inset Formula $x_{i}(t-\tau_{j})$
+\end_inset
+
+ is retrieved by the expression 
+\family typewriter
+xd[j][i]
+\family default
+ (note that 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ are reversed in some sense).
+ A call to 
+\family typewriter
+f(t, x, xd, p, result)
+\family default
+ writes the value of 
+\begin_inset Formula $f($
+\end_inset
+
+
+\family typewriter
+p;t,x,xd[0],...,xd[
+\begin_inset Formula $n_{\tau}$
+\end_inset
+
+]
+\family default
+
+\begin_inset Formula $)$
+\end_inset
+
+ to the vector 
+\family typewriter
+result
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+For instance, if you wish to integrate two delay-coupled Mackey-Glass systems
+\begin_inset Formula 
+\begin{eqnarray}
+\dot{x}_{1}(t) & = & \frac{\sigma x_{2}(t-\tau)}{1+x_{2}(t-\tau)^{n}}-\gamma x_{1}(t),\label{eq:MG1}\\
+\dot{x}_{2}(t) & = & \frac{\sigma x_{1}(t-\tau)}{1+x_{1}(t-\tau)^{n}}-\gamma x_{2}(t),\label{eq:MG2}
+\end{eqnarray}
+
+\end_inset
+
+you could implement the right hand side function as:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+void f(double t,...,vector<double>& result) {
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[0] = p[0] * xd[0][1] / (1 + pow(xd[0][1], p[1])) - p[2] * x[0]; //
+ (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:MG1"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[1] = p[0] * xd[0][0] / (1 + pow(xd[0][0], p[1])) - p[2] * x[1]; //
+ (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:MG2"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+}
+\end_layout
+
+\begin_layout Standard
+where the parameters are 
+\begin_inset Formula $\sigma=$
+\end_inset
+
+
+\family typewriter
+p[0]
+\family default
+, 
+\begin_inset Formula $n=$
+\end_inset
+
+
+\family typewriter
+p[1] 
+\family default
+and 
+\begin_inset Formula $\gamma=$
+\end_inset
+
+
+\family typewriter
+p[2]
+\family default
+, and the delayed terms are 
+\begin_inset Formula $x_{1}(t-\tau)=$
+\end_inset
+
+
+\family typewriter
+xd[0][0]
+\family default
+ and 
+\begin_inset Formula $x_{2}(t-\tau)=$
+\end_inset
+
+
+\family typewriter
+xd[0][1]
+\family default
+.
+\end_layout
+
+\begin_layout Subsection*
+Providing parameters and delays
+\end_layout
+
+\begin_layout Standard
+The parameters 
+\begin_inset Formula $p=(p_{1},...,p_{n_{p}})$
+\end_inset
+
+ and the delays 
+\begin_inset Formula $\tau_{1},...\tau_{n_{\tau}}$
+\end_inset
+
+ in (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rhs-analytical"
+
+\end_inset
+
+) are specified in the parameter file 
+\family typewriter
+ODD_parameters.txt
+\family default
+.
+ In this file, the user can as well control various parameters to the integratio
+n procedure such as starting time and ending time, desired tolerance, minimal
+ and maximal stepwidth, etc.
+ -- see the file 
+\family typewriter
+ODD_default_parameters.txt
+\family default
+ for further documentation.
+ If a parameter is not provided by the user in 
+\family typewriter
+ODD_parameters.txt
+\family default
+, a default value specified in 
+\family typewriter
+ODD_default_parameters.txt
+\family default
+ is used.
+ The later file should not be modified by the user.
+ 
+\end_layout
+
+\begin_layout Standard
+To make the above example (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:MG1"
+
+\end_inset
+
+) and (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:MG2"
+
+\end_inset
+
+) work, assuming 
+\begin_inset Formula $\sigma=2.2$
+\end_inset
+
+, 
+\begin_inset Formula $n=10$
+\end_inset
+
+, 
+\begin_inset Formula $\gamma=1$
+\end_inset
+
+, 
+\begin_inset Formula $\tau=20$
+\end_inset
+
+, and that you wish to integrate for 
+\begin_inset Formula $t\in[0,100]$
+\end_inset
+
+, you should assure that the parameter file contains the following lines:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+N = 2
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+name = TwoMackeyGlass
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+p0 = 2.2
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+p1 = 10
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+p2 = 1
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+tau0 = 20
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+t_start = 0
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+t_end = 100
+\end_layout
+
+\begin_layout Standard
+Here, the specification of the system's name is optional.
+ However, it will influence the naming of the output files.
+ The default value is 
+\family typewriter
+name = noname
+\family default
+.
+\end_layout
+
+\begin_layout Subsection*
+Providing an initial history
+\end_layout
+
+\begin_layout Standard
+The initial data for (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rhs-analytical"
+
+\end_inset
+
+) can be provided in two ways.
+ Either you define a function 
+\family typewriter
+hist(double t, vector<double>& result)
+\family default
+ within the program similarly as you do for the right hand side function
+ 
+\family typewriter
+f(...)
+\family default
+.
+ For each 
+\begin_inset Formula $t$
+\end_inset
+
+ it should assign the value of the initial function to the vector 
+\family typewriter
+result
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+A second way to provide the history function is to store it in a table containin
+g timepoints, the corresponding states of the system and the corresponding
+ derivates of the function.
+ (The derivatives are required until a higher order Newton interpolation
+ is implemented.) If you provide only one time point, the programm treats
+ the corresponding statepoint as a constant initial function (derivatives
+ are not required in this case).
+ The table of initial data can be provided in two ways: in seperate files
+ or in a single file.
+ This is done via the parameter file
+\family typewriter
+ ODD_parameters.txt
+\family default
+ by adding either a line
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+history_file = name_of_some_file.txt
+\end_layout
+
+\begin_layout Standard
+or adding the lines
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+history_t_file = name_of_some_file.txt
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+history_x_file = name_of_some_other_file.txt
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+history_f_file = name_of_some_another_file.txt
+\end_layout
+
+\begin_layout Standard
+In both cases each row corresponds to one time point, different components
+ are seperated by spaces.
+ If all data is contained in a single file, one row should look like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\underbrace{\mathtt{992.88}}_{\mathtt{t}}\ \underbrace{\mathtt{5.10}\ \mathtt{8.74}}_{\mathtt{x}}\ \underbrace{\mathtt{71.69}\ \mathtt{-21.91}}_{\mathtt{f}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Building a program using 
+\family typewriter
+ODDtool
+\end_layout
+
+\begin_layout Standard
+If you wish to integrate the example above, you have to prepare the parameter
+ file 
+\family typewriter
+ODD_parameters.txt
+\family default
+, and a file 
+\family typewriter
+main.cpp
+\family default
+, which includes 
+\family typewriter
+ODDtool.h
+\family default
+ and contains (or includes) the definition of your right hand side function
+ and the method 
+\family typewriter
+main(),
+\family default
+ which constructs an instance of 
+\family typewriter
+ODD_integrator<CKStepper>
+\family default
+ and calls 
+\family typewriter
+integrate()
+\family default
+.
+ Further, you may want to include an explicit definition of a history function.
+ Otherwise, you must provide files containing information about the history.
+ The 
+\family typewriter
+C++
+\family default
+ file might look like this:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+// file main.cpp
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+#include "ODDtool.h"
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+using namespace std;
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+// user-supplied history function 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+void myHistory(double t, vector<double>& result) { 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[0] = abs(cos(t)) + 1; 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[1] = 1 + sin(t); 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+}
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+// Two coupled Mackey-Glass systems
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+void MG2Rhs(double t, const vector<double>& x, ODD_delayed_values& xd, const
+ vector<double>& p, vector<double>& result) {
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[0] = p[0] * xd[0][1] / (1 + pow(xd[0][1], p[1])) - p[2] * x[0];
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+result[1] = p[0] * xd[0][0] / (1 + pow(xd[0][0], p[1])) - p[2] * x[1];
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+}
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+int main() { 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+// create an integrator 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+ODD_integrator<CKStepper> integrator(MG2Rhs, myHistory);
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+// start integration over time interval specified in parameter file (ODD_paramet
+ers.txt) 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+integrator.integrate(); 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+}
+\end_layout
+
+\begin_layout Standard
+If you don't want to specify the history explicitely but prefer to provide
+ it in a file, you can simply drop the corresponding argument in the constructor
+ for the integrator and type instead:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ODD_integrator<CKStepper> integrator(MG2Rhs);
+\end_layout
+
+\begin_layout Standard
+Finally, you compile an executable.
+ To this end you copy your files to the base directory of a copy of oddtool
+ and you type 
+\family typewriter
+make
+\family default
+ to the command line.
+ This should compile the executable 
+\family typewriter
+oddtool
+\family default
+ in this directory.
+ When you run the executable by typing 
+\family typewriter
+./oddtool,
+\family default
+ files are created, which contain the calculated solution.
+\end_layout
+
+\begin_layout Subsection*
+Output
+\end_layout
+
+\begin_layout Standard
+The output-files generated by oddtool are named 
+\family typewriter
+t.txt
+\family default
+, 
+\family typewriter
+x.txt
+\family default
+ and, optionally, 
+\family typewriter
+f.txt
+\family default
+.
+ They are contained in the local directory 
+\family typewriter
+system_name_data/
+\family default
+, if the system's name is specified as 
+\family typewriter
+name = system_name
+\family default
+ in the file 
+\family typewriter
+ODD_parameters.txt
+\family default
+.
+ Moreover, 
+\family typewriter
+integrate()
+\family default
+ generates the files 
+\family typewriter
+system_name_temp/continuation_*.txt
+\family default
+ containing information necessary to resume the integration from the last
+ calculated point.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "/home/leonhard/Dropbox/Arbeitsgruppe_DCSC/Bibliography/Ybibliography"
+options "unsrt"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
