@@ -157,7 +157,7 @@ CKStepper
  denotes a class which implements a CashKarp adaptive-stepwidth method for
  the actual computation of integration steps.
  Other integration methods can be added by implementing different stepper
- classes (which should implement the abstract class 
+ classes (which should be derived from the abstract class 
 \family typewriter
 ODD_Stepper
 \family default
@@ -230,7 +230,7 @@ you wish to integrate.
 \end_inset
 
  is a scalar value of the time, and 
-\begin_inset Formula $x(t-\tau_{k})\in\mathbb{R}^{N}$
+\begin_inset Formula $x(t-\tau_{j})\in\mathbb{R}^{N}$
 \end_inset
 
  is the systems state at time 
@@ -339,10 +339,26 @@ you could implement the right hand side function as:
 \begin_layout Standard
 
 \family typewriter
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+
+\family typewriter
 void f(double t,...,vector<double>& result) {
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family typewriter
 \begin_inset space ~
@@ -367,7 +383,7 @@ reference "eq:MG1"
 )
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family typewriter
 \begin_inset space ~
@@ -392,10 +408,15 @@ reference "eq:MG2"
 )
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family typewriter
 }
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
