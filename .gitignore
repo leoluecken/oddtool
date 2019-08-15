@@ -1,0 +1,6 @@
+*.cproject
+*.project
+oddtool
+*_output
+**.o
+.settings
