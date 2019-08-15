@@ -573,7 +573,7 @@ void SwapVectorStorage::interpolate(const vector<double>& t_query, ODD_delayed_v
                 history_fct(*i, v);
                 // visit all needed delayed components x[i][k]=x_k(t-t_i) for time *i = t-t_i 
                 // and store the calculated value (ck.first==index, ck.second==value)
-                for (auto ck : *j) {
+                for (auto& ck : *j) {
                     ck.second = v[ck.first];
                 }
                 // step forward in x_query.data
@@ -613,7 +613,7 @@ void SwapVectorStorage::interpolate(const vector<double>& t_query, ODD_delayed_v
                 history_fct(*i, v);
                 // visit all needed delayed components x[i][k]=x_k(t-t_i) for time *i = t-t_i 
                 // and store the calculated value (ck.first==index, ck.second==value)
-                for (auto ck : *j) {
+                for (auto& ck : *j) {
                     ck.second = v[ck.first];
                 }
                 // step forward in x_query.data
